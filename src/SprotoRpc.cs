@@ -129,6 +129,7 @@ namespace Sproto
 				if (!this.sessionDictionary.TryGetValue (this.package.session, out response)) {
 					throw new Exception ("Unknown session: " + this.package.session);
 				}
+				this.sessionDictionary.Remove(this.package.session);
 
 				info.tag = null;
 				info.session = this.package.session;
