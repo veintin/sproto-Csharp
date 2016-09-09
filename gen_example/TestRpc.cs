@@ -387,3 +387,154 @@ public class Protocol : ProtocolBase {
 	}
 
 }
+
+public class Rpc
+{
+	static long session = 0;
+
+	static SprotoRpc client;
+	static SprotoRpc.RpcRequest clientRequest;
+
+	static Rpc()
+	{
+		// TODO s2c protocol
+		client = new SprotoRpc(Protocol.Instance);
+		// TODO c2s protocol
+		clientRequest = client.Attach(Protocol.Instance);
+	}
+
+	static System.Action<byte[]> SendData;
+
+	public static void SetSendData(System.Action<byte[]> sd)
+	{
+		SendData = sd;
+	}
+
+	static Dictionary<long, Delegate> c2sCallbacksOfSessions = new Dictionary<long, Delegate>();
+
+	public static void Dispatch(byte[] data)
+	{
+		SprotoRpc.RpcInfo info = client.Dispatch(data);
+		if(info.type == SprotoRpc.RpcType.REQUEST)
+		{
+			S2C.Procedures.__Dispatch(info);
+		}
+		else
+		{
+			Delegate callback;
+			if(c2sCallbacksOfSessions.TryGetValue((long)info.session, out callback))
+			{
+				c2sCallbacksOfSessions.Remove((long)info.session);
+				if(null != info.responseObj)
+				{
+					callback.DynamicInvoke(info.responseObj);
+				}
+				{
+					callback.DynamicInvoke();
+				}
+			}
+		}
+	}
+
+	public class C2S
+	{
+		public class Callbacks
+		{
+			public delegate void foobar(SprotoType.foobar.response res);
+			public delegate void foo(SprotoType.foo.response res);
+			public delegate void blackhole();
+			public delegate void bar();
+		}
+
+		public static void foobar(SprotoType.foobar.request obj, Callbacks.foobar callback)
+		{
+			long? ss = null;
+			if(null != callback)
+			{
+				session++;
+				ss = session;
+				c2sCallbacksOfSessions.Add(session, callback);
+			}
+			SendData(clientRequest.Invoke<Protocol.foobar>(obj, ss));
+		}
+
+		public static void foo(Callbacks.foo callback)
+		{
+			long? ss = null;
+			if(null != callback)
+			{
+				session++;
+				ss = session;
+				c2sCallbacksOfSessions.Add(session, callback);
+			}
+			SendData(clientRequest.Invoke<Protocol.foo>(null, ss));
+		}
+
+		public static void blackhole(SprotoType.blackhole.request obj, Callbacks.blackhole callback = null)
+		{
+			long? ss = null;
+			if(null != callback)
+			{
+				session++;
+				ss = session;
+				c2sCallbacksOfSessions.Add(session, callback);
+			}
+			SendData(clientRequest.Invoke<Protocol.foobar>(obj, ss));
+		}
+
+		public static void bar(Callbacks.bar callback = null)
+		{
+			long? ss = null;
+			if(null != callback)
+			{
+				session++;
+				ss = session;
+				c2sCallbacksOfSessions.Add(session, callback);
+			}
+			SendData(clientRequest.Invoke<Protocol.foo>(null, ss));
+		}
+	}
+
+	public class S2C
+	{
+		public class Procedures
+		{
+			public delegate SprotoType.foobar.response foobar(SprotoType.foobar.request req);
+			public delegate SprotoType.foo.response foo();
+			public delegate void blackhole(SprotoType.blackhole.request req);
+			public delegate void bar();
+
+			public static void __Dispatch(SprotoRpc.RpcInfo info)
+			{
+				Sproto.SprotoTypeBase ret = null;
+				switch (info.tag)
+				{
+					case Protocol.foobar.Tag:
+						ret = foobar((SprotoType.foobar.request)info.requestObj);
+						break;
+					case Protocol.foo.Tag:
+						ret = foo();
+						break;
+					case Protocol.blackhole.Tag:
+						blackhole((SprotoType.blackhole.request)info.requestObj);
+						break;
+					case Protocol.bar.Tag:
+						bar();
+						break;
+					default:
+						break;
+				}
+				if(null != info.Response)
+				{
+					SendData(info.Response(ret));
+				}
+			}
+		}
+
+		public static Procedures.foobar foobar;
+		public static Procedures.foo foo;
+		public static Procedures.blackhole blackhole;
+		public static Procedures.bar bar;
+	}
+}
+
