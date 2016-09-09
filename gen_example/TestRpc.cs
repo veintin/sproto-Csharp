@@ -510,16 +510,16 @@ public class Rpc
 				switch (info.tag)
 				{
 					case Protocol.foobar.Tag:
-						ret = foobar((SprotoType.foobar.request)info.requestObj);
+						ret = S2C.foobar((SprotoType.foobar.request)info.requestObj);
 						break;
 					case Protocol.foo.Tag:
-						ret = foo();
+						ret = S2C.foo();
 						break;
 					case Protocol.blackhole.Tag:
-						blackhole((SprotoType.blackhole.request)info.requestObj);
+						S2C.blackhole((SprotoType.blackhole.request)info.requestObj);
 						break;
 					case Protocol.bar.Tag:
-						bar();
+						S2C.bar();
 						break;
 					default:
 						break;

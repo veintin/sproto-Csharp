@@ -42,11 +42,11 @@ namespace sprotoCsharp
 
 			byte[] data = address.encode ();
 
-			Sproto.SprotoPack spack = new Sproto.SprotoPack ();
+			//Sproto.SprotoPack spack = new Sproto.SprotoPack ();
 
 //			byte[] pack_data = spack.pack (data);
 
-			Sproto.SprotoStream stream = new SprotoStream ();
+			//Sproto.SprotoStream stream = new SprotoStream ();
 			double b = this.cur_mseconds ();
 			for (int i = 0; i < 1000000; i++) {
 				address.init (data);

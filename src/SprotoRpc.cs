@@ -98,8 +98,8 @@ namespace Sproto
 				if (this.package.HasSession) {
 					long session = this.package.session;
 					info.Response = delegate (SprotoTypeBase response) {
-						ProtocolFunctionDictionary.MetaInfo pinfo = this.protocol [tag];
 #if (!INCLUDE_IL2CPP)
+						ProtocolFunctionDictionary.MetaInfo pinfo = this.protocol [tag];
 						if (response.GetType () != pinfo.Response.Key) {
 							throw new Exception ("response type: " + response.GetType ().ToString () + "is not expected.(" + pinfo.Response.Key.ToString () + ")");
 						}

@@ -17,14 +17,14 @@ namespace Sproto {
 		}
 
 		private int _get_array_idx(int bit_idx){
-			int size = has_bits.Length;
+//			int size = has_bits.Length;
 			int array_idx = bit_idx / slot_bits_size;
 
 			return array_idx;
 		}
 
 		private int _get_slotbit_idx(int bit_idx){
-			int size = has_bits.Length;
+//			int size = has_bits.Length;
 			int slotbit_idx = bit_idx % slot_bits_size;
 
 			return slotbit_idx;
